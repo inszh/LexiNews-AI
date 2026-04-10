@@ -1,0 +1,120 @@
+<!-- pages/discover/discover.wxml -->
+<view class="container">
+
+  <!-- 顶部标签切换 -->
+  <view class="disc-tabs">
+    <view
+      class="disc-tab {{activeTab === 'bookmark' ? 'disc-tab-active' : ''}}"
+      bindtap="switchTab" data-tab="bookmark"
+    >
+      <text class="disc-tab-icon">★</text>
+      <text class="disc-tab-text">收藏</text>
+    </view>
+    <view
+      class="disc-tab {{activeTab === 'search' ? 'disc-tab-active' : ''}}"
+      bindtap="switchTab" data-tab="search"
+    >
+      <text class="disc-tab-icon">🔍</text>
+      <text class="disc-tab-text">搜索</text>
+    </view>
+  </view>
+
+  <!-- ── 收藏页 ── -->
+  <scroll-view wx:if="{{activeTab === 'bookmark'}}" scroll-y class="disc-scroll">
+
+    <!-- 空状态 -->
+    <view wx:if="{{bookmarks.length === 0}}" class="empty-wrap">
+      <text class="empty-icon">☆</text>
+      <text class="empty-title">还没有收藏</text>
+      <text class="empty-desc">在文章详情页点击 ☆ 即可收藏</text>
+    </view>
+
+    <!-- 收藏列表 -->
+    <view wx:for="{{bookmarks}}" wx:key="id" class="bm-card" bindtap="openArticle" data-item="{{item}}">
+      <view class="bm-img-wrap">
+        <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" class="bm-img"></image>
+        <view wx:else class="bm-img-placeholder"></view>
+      </view>
+      <view class="bm-body">
+        <text class="bm-title">{{item.title}}</text>
+        <view class="bm-meta-row">
+          <text class="bm-source">{{item.sourceName}}</text>
+          <text class="bm-date">{{item.publishedAt}}</text>
+        </view>
+      </view>
+      <!-- 长按取消收藏 -->
+      <view class="bm-remove" catchtap="removeBookmark" data-id="{{item.id}}">
+        <text class="bm-remove-icon">★</text>
+      </view>
+    </view>
+
+    <view style="height:120rpx"></view>
+  </scroll-view>
+
+  <!-- ── 搜索页 ── -->
+  <scroll-view wx:if="{{activeTab === 'search'}}" scroll-y class="disc-scroll">
+
+    <!-- 搜索框 -->
+    <view class="search-bar">
+      <text class="search-icon-txt">🔍</text>
+      <input
+        class="search-input"
+        placeholder="搜索标题、分类、标签..."
+        placeholder-style="color:#B0ADA8;font-size:28rpx"
+        value="{{searchQuery}}"
+        bindinput="onSearchInput"
+        confirm-type="search"
+      />
+      <view wx:if="{{searchQuery}}" class="search-clear" bindtap="clearSearch">
+        <text class="search-clear-icon">✕</text>
+      </view>
+    </view>
+
+    <!-- 无输入：话题分类 -->
+    <view wx:if="{{!searchQuery}}">
+      <text class="section-title">📂 分类浏览</text>
+      <view class="trend-grid">
+        <view
+          wx:for="{{categories}}"
+          wx:key="*this"
+          class="trend-chip"
+          bindtap="searchTrend"
+          data-q="{{item}}"
+        >
+          <text class="trend-text">{{item}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 有输入：搜索结果 -->
+    <view wx:else>
+      <text class="results-count">找到 {{searchResults.length}} 篇相关文章</text>
+      <view
+        wx:for="{{searchResults}}"
+        wx:key="id"
+        class="result-card"
+        bindtap="openArticle"
+        data-item="{{item}}"
+      >
+        <view class="result-img-wrap">
+          <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" class="result-img"></image>
+          <view wx:else class="result-img-fallback">
+            <text class="result-cat-txt">{{item.category || '资讯'}}</text>
+          </view>
+        </view>
+        <view class="result-body">
+          <text class="result-title">{{item.title}}</text>
+          <text class="result-meta">{{item.sourceName}} · {{item.publishedAt}}</text>
+        </view>
+      </view>
+      <view wx:if="{{searchResults.length === 0}}" class="empty-wrap">
+        <text class="empty-icon">🔍</text>
+        <text class="empty-title">没有相关内容</text>
+        <text class="empty-desc">换个关键词试试</text>
+      </view>
+    </view>
+
+    <view style="height:120rpx"></view>
+  </scroll-view>
+
+</view>

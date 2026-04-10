@@ -1,0 +1,108 @@
+/** app.wxss **/
+
+/* 1. 替换掉报错的 * 选择器，使用 view 等具体标签 */
+view, text, scroll-view, input, button {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* 2. 确保页面背景色和字体（可选） */
+page {
+  background-color: #FAFAF7; /* 匹配你 app.json 里的背景色 */
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+}
+
+/* 通用卡片 */
+.card-base {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+/* 通用标签 */
+.tag-item {
+  display: inline-block;
+  background: #F0EDE8;
+  color: #6A6660;
+  font-size: 20rpx;
+  font-weight: 600;
+  padding: 4rpx 14rpx;
+  border-radius: 12rpx;
+  margin-right: 8rpx;
+  margin-bottom: 4rpx;
+}
+
+/* 通用按钮 */
+.btn-primary {
+  background: #1A1A18;
+  color: #FAFAF7;
+  font-weight: 700;
+  border-radius: 24rpx;
+  text-align: center;
+  border: none;
+}
+
+.btn-secondary {
+  background: #F0EDE8;
+  color: #1A1A18;
+  font-weight: 600;
+  border-radius: 24rpx;
+  text-align: center;
+  border: none;
+}
+
+/* AI插入卡片 */
+.ai-insert-card {
+  background: #F7F4EF;
+  border-radius: 24rpx;
+  padding: 28rpx;
+  margin-bottom: 28rpx;
+  border-left: 6rpx solid #1A1A18;
+}
+
+.ai-insert-badge {
+  font-size: 24rpx;
+  font-weight: 800;
+  color: #1A1A18;
+}
+
+.ai-insert-selected {
+  background: rgba(0,0,0,0.05);
+  border-radius: 12rpx;
+  padding: 16rpx;
+  margin: 16rpx 0;
+}
+
+.ai-insert-selected-label {
+  font-size: 20rpx;
+  color: #8A8680;
+  font-weight: 700;
+  margin-bottom: 8rpx;
+}
+
+.ai-insert-selected-text {
+  font-size: 24rpx;
+  color: #6A6660;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.ai-insert-divider {
+  height: 1rpx;
+  background: rgba(0,0,0,0.08);
+  margin: 20rpx 0;
+}
+
+.ai-insert-prompt-label {
+  font-size: 22rpx;
+  color: #8A8680;
+  font-weight: 600;
+  margin-bottom: 12rpx;
+}
+
+.ai-insert-result {
+  font-size: 28rpx;
+  color: #1A1A18;
+  line-height: 1.7;
+}

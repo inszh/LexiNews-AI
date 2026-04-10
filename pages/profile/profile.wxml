@@ -1,0 +1,233 @@
+<!-- pages/profile/profile.wxml -->
+<view class="container">
+  <scroll-view scroll-y style="height:100vh" show-scrollbar="{{false}}">
+
+    <!-- 顶部 Hero 区 -->
+    <view class="hero-section">
+      <view class="hero-blur-bg"></view>
+      <view class="avatar-wrap">
+        <view class="avatar-ring">
+          <view class="avatar-inner">
+            <image class="avatar-img" src="../../images/logo.png" mode="aspectFill"></image>
+          </view>
+        </view>
+        <view class="avatar-badge">AI</view>
+      </view>
+      <text class="profile-name">LEXINEWS AI</text>
+      <text class="profile-sub">智能阅读 · 深度理解 · 高效学习</text>
+
+      <!-- 统计卡片（紧凑版） -->
+      <view class="stats-row">
+        <view class="stat-card" bindtap="{{activeTab}}" data-tab="read">
+          <text class="stat-val">{{readCount}}</text>
+          <text class="stat-lbl">已读</text>
+        </view>
+        <view class="stat-divider"></view>
+        <view class="stat-card">
+          <text class="stat-val">{{aiCount}}</text>
+          <text class="stat-lbl">AI分析</text>
+        </view>
+        <view class="stat-divider"></view>
+        <view class="stat-card">
+          <text class="stat-val">{{likeCount}}</text>
+          <text class="stat-lbl">收藏</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 社交推广区 -->
+    <view class="section-gap">
+      <view class="section-label">
+        <text class="section-label-icon">✦</text>
+        <text class="section-label-text">关注作者</text>
+      </view>
+      <view class="social-cards">
+
+        <!-- 小红书 -->
+        <view class="social-card xhs-card" bindtap="openXiaohongshu">
+          <view class="social-card-left">
+            <view class="social-icon-wrap xhs-icon-bg">
+              <text class="social-icon">🍠</text>
+            </view>
+            <view class="social-info">
+              <text class="social-name">@Zane同学</text>
+              <text class="social-desc">小红书 · 干货笔记分享</text>
+            </view>
+          </view>
+          <view class="social-follow-btn xhs-btn">
+            <text class="social-follow-text">关注</text>
+          </view>
+        </view>
+
+        <!-- 微信公众号 -->
+        <view class="social-card wechat-card" bindtap="openWechatOA">
+          <view class="social-card-left">
+            <view class="social-icon-wrap wechat-icon-bg">
+              <text class="social-icon">💬</text>
+            </view>
+            <view class="social-info">
+              <text class="social-name">@Zane同学说</text>
+              <text class="social-desc">微信公众号 · 深度内容</text>
+            </view>
+          </view>
+          <view class="social-follow-btn wechat-btn">
+            <text class="social-follow-text">订阅</text>
+          </view>
+        </view>
+
+      </view>
+    </view>
+
+    <!-- AI 配置 -->
+    <view class="section-gap">
+      <view class="section-label">
+        <text class="section-label-icon">◆</text>
+        <text class="section-label-text">AI 配置</text>
+      </view>
+
+      <!-- 接口地址 -->
+      <view class="cfg-field-card">
+        <view class="cfg-field-top">
+          <view class="cfg-icon-badge url-badge">
+            <text class="cfg-badge-icon">🌐</text>
+          </view>
+          <view class="cfg-field-meta">
+            <text class="cfg-field-title">接口地址</text>
+            <text class="cfg-field-desc">AI 服务的 API 地址</text>
+          </view>
+        </view>
+        <view class="cfg-input-box">
+          <input
+            class="cfg-inp"
+            placeholder="https://api.openai.com/v1/chat/completions"
+            placeholder-style="color:#C8C4BF;font-size:24rpx"
+            value="{{aiUrl}}"
+            bindinput="onUrlInput"
+            confirm-type="done"
+          />
+        </view>
+      </view>
+
+      <!-- API Key -->
+      <view class="cfg-field-card" style="margin-top:16rpx">
+        <view class="cfg-field-top">
+          <view class="cfg-icon-badge key-badge">
+            <text class="cfg-badge-icon">🔑</text>
+          </view>
+          <view class="cfg-field-meta">
+            <text class="cfg-field-title">API Key</text>
+            <text class="cfg-field-desc">身份验证密钥，本地加密存储</text>
+          </view>
+          <view class="cfg-eye-btn" bindtap="toggleKeyVis" style="width: 100rpx;">
+            <text class="cfg-eye-icon" style="font-size: 24rpx; color: #888;">{{showKey ? '隐藏' : '显示'}}</text>
+          </view>
+        </view>
+        <view class="cfg-input-box">
+          <input
+            class="cfg-inp cfg-inp-mono"
+            password="{{!showKey}}"
+            placeholder="sk-xxxxxxxxxxxxxxxx"
+            placeholder-style="color:#C8C4BF;font-size:24rpx"
+            value="{{apiKey}}"
+            bindinput="onKeyInput"
+            confirm-type="done"
+          />
+        </view>
+      </view>
+
+      <!-- 模型名 -->
+      <view class="cfg-field-card" style="margin-top:16rpx">
+        <view class="cfg-field-top">
+          <view class="cfg-icon-badge model-badge">
+            <text class="cfg-badge-icon">🤖</text>
+          </view>
+          <view class="cfg-field-meta">
+            <text class="cfg-field-title">模型名称</text>
+            <text class="cfg-field-desc">调用的语言模型标识符</text>
+          </view>
+        </view>
+        <view class="cfg-input-box">
+          <input
+            class="cfg-inp"
+            placeholder="[超低价]MiniMax-M2.5-highspeed"
+            placeholder-style="color:#C8C4BF;font-size:24rpx"
+            value="{{aiModel}}"
+            bindinput="onModelInput"
+            confirm-type="done"
+          />
+        </view>
+      </view>
+
+      <!-- 默认提示词 -->
+      <view class="cfg-field-card" style="margin-top:16rpx">
+        <view class="cfg-field-top">
+          <view class="cfg-icon-badge prompt-badge" style="background: rgba(144,202,249,0.15); color: #1976D2;">
+            <text class="cfg-badge-icon">💭</text>
+          </view>
+          <view class="cfg-field-meta">
+            <text class="cfg-field-title">默认提示词</text>
+            <text class="cfg-field-desc">AI 面板打开时的默认处理指令</text>
+          </view>
+        </view>
+        <view class="cfg-input-box">
+          <input
+            class="cfg-inp"
+            placeholder="翻译为中文，输出原文, 列出重点单词和词组，简短"
+            placeholder-style="color:#C8C4BF;font-size:24rpx"
+            value="{{aiPrompt}}"
+            bindinput="onPromptInput"
+            confirm-type="done"
+          />
+        </view>
+      </view>
+
+      <!-- 按钮组 -->
+      <view class="cfg-btn-group" style="margin-top:16rpx">
+        <button class="cfg-btn-reset" bindtap="resetSettings">恢复默认</button>
+        <button class="cfg-btn-save" bindtap="saveSettings">保存配置</button>
+      </view>
+
+      <view class="cfg-security-note" style="margin-top:16rpx">
+        <text class="cfg-security-text">配置仅存储于本地设备，不会上传任何服务器</text>
+      </view>
+    </view>
+
+
+    <!-- 缓存管理 -->
+    <view class="section-gap">
+      <view class="section-label">
+        <text class="section-label-text">存储与缓存</text>
+      </view>
+      <view class="about-card">
+        <view class="about-row">
+          <text class="about-lbl">当前占用</text>
+          <text class="about-val">{{cacheSize}}</text>
+        </view>
+        <view class="about-row with-border">
+          <text class="about-lbl">已缓存文章</text>
+          <text class="about-val">{{cacheCount}} 篇</text>
+        </view>
+        <view class="cache-clear-row">
+          <button class="cache-clear-btn" bindtap="clearCache">清理全部缓存</button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 关于 -->
+    <view class="section-gap">
+      <view class="section-label">
+        <text class="section-label-icon">ℹ</text>
+        <text class="section-label-text">关于</text>
+      </view>
+      <view class="about-card">
+        <view class="about-row">
+          <text class="about-lbl">版本</text>
+          <text class="about-val">1.0</text>
+        </view>
+      </view>
+    </view>
+
+
+    <view style="height:120rpx"></view>
+  </scroll-view>
+</view>

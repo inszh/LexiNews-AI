@@ -1,0 +1,299 @@
+<page-meta page-style="{{ showAiPanel ? 'overflow: hidden;' : '' }}" />
+<view class="container">
+  <scroll-view
+    scroll-y="{{!showAiPanel}}"
+    class="detail-scroll"
+    enhanced
+    show-scrollbar="{{false}}"
+    scroll-into-view="{{scrollTarget}}"
+    scroll-with-animation
+  >
+
+    <view class="article-body">
+      <view class="article-title-wrap" bindlongpress="onParagraphTap" data-index="-1" data-text="{{article.title}}">
+        <text class="article-title">{{article.title}}</text>
+      </view>
+      
+      <view class="meta-row">
+        <image wx:if="{{article.icon}}" src="{{article.icon}}" class="author-avatar"></image>
+        <view class="meta-info">
+          <text class="author-name">{{article.sourceName || 'Reuters'}}</text>
+        </view>
+        <text class="meta-readtime">阅读时长：{{article.readTime || 1}} 分钟</text>
+      </view>
+
+      <view class="summary-box" wx:if="{{article.summary}}"
+        bindlongpress="onParagraphTap"
+        data-index="-2"
+        data-text="{{article.summary}}"
+      >
+        <text class="summary-label">摘要</text>
+        <text class="summary-text">{{article.summary}}</text>
+      </view>
+
+      <!-- 文章摘要的 AI 分析结果 -->
+      <view id="blk--2">
+        <block wx:if="{{article.summaryInserts && article.summaryInserts.length > 0}}">
+          <view wx:for="{{article.summaryInserts}}" wx:for-item="ins" wx:for-index="insIdx" wx:key="id" class="ai-insert-card" style="margin: 0 32rpx 20rpx;">
+            <view class="ai-insert-header">
+              <view class="ai-insert-header-left">
+                <text class="ai-insert-icon">◆</text>
+                <text class="ai-insert-prompt">{{ins.prompt}}</text>
+              </view>
+              <view class="ai-insert-close" bindtap="onRemoveAnalysis" data-index="-2" data-id="{{ins.id}}">×</view>
+            </view>
+            <text class="ai-insert-result" user-select>{{ins.result}}</text>
+          </view>
+        </block>
+      </view>
+
+      <!-- 文章标题的 AI 分析结果 -->
+      <view id="blk--1">
+        <block wx:if="{{article.inserts && article.inserts.length > 0}}">
+          <view wx:for="{{article.inserts}}" wx:for-item="ins" wx:for-index="insIdx" wx:key="id" class="ai-insert-card" style="margin: 0 32rpx 20rpx;">
+            <view class="ai-insert-header">
+              <view class="ai-insert-header-left">
+                <text class="ai-insert-icon">◆</text>
+                <text class="ai-insert-prompt">{{ins.prompt}}</text>
+              </view>
+              <view class="ai-insert-close" bindtap="onRemoveAnalysis" data-index="-1" data-id="{{ins.id}}">×</view>
+            </view>
+            <text class="ai-insert-result" user-select>{{ins.result}}</text>
+          </view>
+        </block>
+      </view>
+
+      <view class="content-area">
+        <!-- AI 提示横幅 -->
+        <view class="ai-hint-bar">
+          <text class="ai-hint-icon">❖</text>
+          <text class="ai-hint-text">长按文字段落，可选中后进行 AI 分析</text>
+        </view>
+
+        <!-- 骨架屏：加载中显示闪动灰色块 -->
+        <view wx:if="{{isLoading && (!paragraphs || paragraphs.length === 0)}}" class="skeleton-wrap">
+          <view class="skeleton-line skeleton-line-full"></view>
+          <view class="skeleton-line skeleton-line-full"></view>
+          <view class="skeleton-line skeleton-line-3q"></view>
+          <view class="skeleton-gap"></view>
+          <view class="skeleton-image"></view>
+          <view class="skeleton-line skeleton-line-full"></view>
+          <view class="skeleton-line skeleton-line-full"></view>
+          <view class="skeleton-line skeleton-line-half"></view>
+          <view class="skeleton-gap"></view>
+          <view class="skeleton-line skeleton-line-full"></view>
+          <view class="skeleton-line skeleton-line-full"></view>
+          <view class="skeleton-line skeleton-line-3q"></view>
+          <view class="skeleton-gap"></view>
+          <view class="skeleton-line skeleton-line-full"></view>
+          <view class="skeleton-line skeleton-line-full"></view>
+          <view class="skeleton-line skeleton-line-half"></view>
+        </view>
+
+        <!-- 用 view 包裹每个 block，便于 scroll-into-view 定位 -->
+        <block wx:for="{{paragraphs}}" wx:key="index">
+          <view id="blk-{{index}}">
+
+            <!-- 段落 -->
+            <view
+              wx:if="{{item.type === 'p'}}"
+              class="paragraph {{selectedIndex === index ? 'paragraph-selected' : ''}}"
+              bindlongpress="onParagraphTap"
+              data-index="{{index}}"
+              data-text="{{item.text}}"
+            >
+              <text>{{item.text}}</text>
+            </view>
+
+            <!-- 标题和其他内容块（同样支持长按分析） -->
+            <view wx:if="{{item.type === 'h1'}}" class="block-h1"
+              bindlongpress="onParagraphTap"
+              data-index="{{index}}" data-text="{{item.text}}">
+              <text user-select>{{item.text}}</text>
+            </view>
+            <view wx:if="{{item.type === 'h2'}}" class="block-h2"
+              bindlongpress="onParagraphTap"
+              data-index="{{index}}" data-text="{{item.text}}">
+              <text user-select>{{item.text}}</text>
+            </view>
+            <view wx:if="{{item.type === 'h3'}}" class="block-h3"
+              bindlongpress="onParagraphTap"
+              data-index="{{index}}" data-text="{{item.text}}">
+              <text user-select>{{item.text}}</text>
+            </view>
+            <view wx:if="{{item.type === 'bullet'}}" class="block-bullet"
+              bindlongpress="onParagraphTap"
+              data-index="{{index}}" data-text="{{item.text}}">
+              <text class="bullet-dot">•</text>
+              <text user-select class="bullet-text">{{item.text}}</text>
+            </view>
+            <view wx:if="{{item.type === 'numbered'}}" class="block-bullet"
+              bindlongpress="onParagraphTap"
+              data-index="{{index}}" data-text="{{item.text}}">
+              <text class="bullet-dot">—</text>
+              <text user-select class="bullet-text">{{item.text}}</text>
+            </view>
+            <view wx:if="{{item.type === 'quote'}}" class="block-quote"
+              bindlongpress="onParagraphTap"
+              data-index="{{index}}" data-text="{{item.text}}">
+              <text user-select>{{item.text}}</text>
+            </view>
+            <view wx:if="{{item.type === 'callout'}}" class="block-callout"
+              bindlongpress="onParagraphTap"
+              data-index="{{index}}" data-text="{{item.text}}">
+              <text class="callout-emoji">{{item.emoji}}</text>
+              <text user-select class="callout-text">{{item.text}}</text>
+            </view>
+
+            <!-- AI 分析结果卡片（任意块类型均支持） -->
+            <block wx:if="{{item.inserts && item.inserts.length > 0}}">
+              <view
+                wx:for="{{item.inserts}}"
+                wx:for-item="ins"
+                wx:for-index="insIdx"
+                wx:key="id"
+                class="ai-insert-card"
+              >
+                <view class="ai-insert-header">
+                  <view class="ai-insert-header-left">
+                    <text class="ai-insert-icon">◆</text>
+                    <text class="ai-insert-prompt">{{ins.prompt}}</text>
+                  </view>
+                  <view class="ai-insert-close" bindtap="onRemoveAnalysis" data-index="{{index}}" data-id="{{ins.id}}">×</view>
+                </view>
+                <text class="ai-insert-result" user-select>{{ins.result}}</text>
+              </view>
+            </block>
+
+            <!-- 代码块 -->
+            <view wx:if="{{item.type === 'code'}}" class="block-code"
+              bindlongpress="onParagraphTap"
+              data-index="{{index}}" data-text="{{item.text}}">
+              <text user-select>{{item.text}}</text>
+            </view>
+
+            <!-- 分割线 -->
+            <view wx:if="{{item.type === 'divider'}}" class="block-divider"></view>
+
+            <!-- Toggle 折叠块 -->
+            <view wx:if="{{item.type === 'toggle'}}" class="block-toggle"
+              bindlongpress="onParagraphTap"
+              data-index="{{index}}" data-text="{{item.text}}">
+              <text>▸ {{item.text}}</text>
+            </view>
+
+            <!-- 图片 -->
+            <view wx:if="{{item.type === 'img'}}" class="body-image-wrap">
+              <view class="body-image-placeholder skeleton-shimmer"></view>
+              <image
+                src="{{item.src}}"
+                mode="widthFix"
+                class="body-image"
+                lazy-load
+              ></image>
+            </view>
+
+          </view>
+        </block>
+      </view>
+      
+      <view style="height: 120rpx;"></view>
+    </view>
+  </scroll-view>
+
+  <!-- 底部收藏栏（紧凑） -->
+  <view class="bottom-bar">
+    <view class="bookmark-btn" bindtap="toggleBookmark">
+      <text class="bookmark-star {{bookmarked ? 'bookmarked' : ''}}">{{bookmarked ? '★' : '☆'}}</text>
+      <text class="bookmark-label">{{bookmarked ? '已收藏' : '收藏'}}</text>
+    </view>
+  </view>
+
+  <!-- 遮罩层 -->
+  <view class="ai-overlay" wx:if="{{showAiPanel}}" bindtap="closeAiPanel" catchtouchmove="noop"></view>
+
+  <!-- AI 分析底部弹窗（无拖拽，固定高度，键盘感知） -->
+  <view
+    class="ai-panel {{showAiPanel ? 'ai-panel-show' : ''}}"
+    style="bottom: {{keyboardHeight > 0 ? keyboardHeight + 'px' : '0px'}}"
+  >
+    <!-- 顶部装饰条（不可拖拽） -->
+    <view class="ai-top-bar">
+      <view class="ai-drag-bar"></view>
+    </view>
+
+    <!-- 标题行 -->
+    <view class="ai-panel-header">
+      <view class="ai-panel-title-wrap">
+        <text class="ai-panel-icon">◆</text>
+        <text class="ai-panel-title">AI 分析</text>
+      </view>
+      <view class="ai-panel-close" bindtap="closeAiPanel">
+        <text class="ai-close-icon">×</text>
+      </view>
+    </view>
+
+    <!-- 选中内容（可滚动、可编辑） -->
+    <view class="ai-selected-box">
+      <view class="ai-selected-label-row">
+        <text class="ai-selected-label">选中内容</text>
+        <!-- 朗读选中的英文句子 -->
+        <view
+          class="ai-panel-speak-btn {{isSpeaking ? 'speaking' : ''}}"
+          bindtap="onSpeakSelected"
+        >
+          <text class="ai-panel-speak-icon">{{isSpeaking ? '⏹' : '🔊'}}</text>
+        </view>
+      </view>
+      <scroll-view scroll-y class="ai-selected-scroll" enhanced show-scrollbar="{{false}}">
+        <textarea
+          class="ai-selected-input"
+          value="{{selectedText}}"
+          bindinput="onSelectedTextChange"
+          auto-height
+          fixed
+          show-confirm-bar="{{false}}"
+        ></textarea>
+      </scroll-view>
+    </view>
+
+    <!-- 快捷操作按钮 -->
+    <scroll-view scroll-x class="ai-quick-scroll" enhanced show-scrollbar="{{false}}">
+      <view class="ai-quick-btns">
+        <view class="ai-quick-btn" bindtap="onQuickAction" data-action="翻译中文">翻译中文</view>
+        <view class="ai-quick-btn" bindtap="onQuickAction" data-action="解释一下">解释一下</view>
+        <view class="ai-quick-btn" bindtap="onQuickAction" data-action="分析">分析</view>
+        <view class="ai-quick-btn" bindtap="onQuickAction" data-action="背景知识">背景知识</view>
+        <view class="ai-quick-btn" bindtap="onQuickAction" data-action="客观评价">客观评价</view>
+      </view>
+    </scroll-view>
+
+    <!-- 输入行 -->
+    <view class="ai-input-row">
+      <input
+        class="ai-input"
+        placeholder="{{aiPrompt || '翻译为中文，输出原文，列出重点单词和词组，简短'}}"
+        placeholder-class="ai-input-placeholder"
+        bindinput="onAiInputChange"
+        value="{{aiInput}}"
+        confirm-type="send"
+        bindconfirm="onSendAi"
+        disabled="{{isAnalyzing}}"
+        adjust-position="{{false}}"
+        bindfocus="onInputFocus"
+        bindblur="onInputBlur"
+      />
+      <view class="ai-send-btn {{isAnalyzing ? 'ai-send-btn-analyzing' : ''}}" bindtap="{{isAnalyzing ? '' : 'onSendAi'}}">
+        <block wx:if="{{isAnalyzing}}">
+          <view class="ai-dots">
+            <view class="ai-dot"></view>
+            <view class="ai-dot"></view>
+            <view class="ai-dot"></view>
+          </view>
+        </block>
+        <text class="ai-send-text" wx:else>发送</text>
+      </view>
+    </view>
+  </view>
+
+</view>

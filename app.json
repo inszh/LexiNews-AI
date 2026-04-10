@@ -1,0 +1,46 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/detail/detail",
+    "pages/discover/discover",
+    "pages/profile/profile"
+  ],
+  "tabBar": {
+    "color": "#B0ADA8",
+    "selectedColor": "#1A1A18",
+    "backgroundColor": "#FAFAF7",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "images/home.png",
+        "selectedIconPath": "images/home-active.png"
+      },
+      {
+        "pagePath": "pages/discover/discover",
+        "text": "知识库",
+        "iconPath": "images/discover.png",
+        "selectedIconPath": "images/discover-active.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "images/profile.png",
+        "selectedIconPath": "images/profile-active.png"
+      }
+    ]
+  },
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#FAFAF7",
+    "navigationBarTitleText": "LEXINEWS AI",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#FAFAF7"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "networkTimeout": {
+    "request": 60000
+  }
+}
