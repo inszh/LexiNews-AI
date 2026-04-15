@@ -69,12 +69,3 @@ LexiNews-AI 的核心不是“学习单词”，而是：
 - RSS feeds
 - 自定义新闻源
 
----
-
-## 🚀 快速开始
-
-```bash
-git clone https://github.com/yourname/LexiNews-AI.git
-cd LexiNews-AI
-npm install
-npm run dev
