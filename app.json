@@ -34,7 +34,7 @@
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#FAFAF7",
-    "navigationBarTitleText": "LEXINEWS AI",
+    "navigationBarTitleText": "",
     "navigationBarTextStyle": "black",
     "backgroundColor": "#FAFAF7"
   },
@@ -42,5 +42,6 @@
   "sitemapLocation": "sitemap.json",
   "networkTimeout": {
     "request": 60000
-  }
+  },
+  "lazyCodeLoading": "requiredComponents"
 }

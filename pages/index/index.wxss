@@ -1,6 +1,28 @@
 /* pages/index/index.wxss */
 .container { background: #FAFAF7; min-height: 100vh; }
 
+/* 精炼的水平 Logo 顶栏 */
+.brand-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 30rpx 32rpx 10rpx;
+  background: #FAFAF7;
+}
+
+.logo-img {
+  width: 50rpx;
+  height: 50rpx;
+  margin-right: 16rpx;
+}
+
+.brand-name {
+  font-size: 32rpx;
+  font-weight: 800;
+  letter-spacing: 2rpx;
+  color: #1A1A18;
+}
+
 .masonry-grid {
   display: flex;
   gap: 12rpx;
@@ -28,18 +50,31 @@
 }
 
 .card-image-wrap {
+  position: relative;
   width: 100%;
-  background-color: #F0EDE8;
-  line-height: 0; /* 消除图片底部空隙 */
+  min-height: 200rpx; /* 占位高度由父容器负责 */
+  background: #F2F1ED;
+  overflow: hidden;
+  line-height: 0;
 }
 
 .main-image {
   width: 100%;
-  height: auto; /* 配合 widthFix 实现高度自适应 */
+  height: auto;
   display: block;
+  opacity: 0;
+  transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.image-placeholder { width: 100%; background: #F0EDE8; }
+.main-image.loaded {
+  opacity: 1;
+}
+
+.image-placeholder-base {
+  width: 100%;
+  height: 240rpx;
+  background: #F2F1ED;
+}
 
 .card-body {
   padding: 16rpx;
@@ -162,66 +197,78 @@
   letter-spacing: 2rpx;
 }
 
-/* ===== 骨架屏样式 ===== */
+/* ===== 模拟瀑布流骨架屏 ===== */
+.masonry-grid-skeleton {
+  display: flex;
+  gap: 12rpx;
+  padding: 16rpx 12rpx;
+  box-sizing: border-box;
+}
+
+.masonry-col-skeleton {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
 .skeleton-card {
-  box-shadow: none !important;
-  background: #f8f8f8 !important;
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.02);
 }
 
-.skeleton-image {
+.skeleton-image-wrap {
   width: 100%;
-  height: 260rpx;
-  background: #ecebe9;
-  position: relative;
-  overflow: hidden;
+  height: 220rpx; /* 调低高度，更显精干 */
+  background: #F2F1ED;
 }
 
-.skeleton-title {
-  width: 85%;
-  height: 28rpx;
-  background: #ecebe9;
-  margin-bottom: 12rpx;
+.skeleton-content {
+  padding: 20rpx 16rpx;
+}
+
+.skeleton-line-long {
+  width: 92%;
+  height: 22rpx;
+  background: #F2F1ED;
+  margin-bottom: 14rpx;
   border-radius: 4rpx;
-  position: relative;
-  overflow: hidden;
 }
 
-.skeleton-title-short {
-  width: 50%;
-  height: 28rpx;
-  background: #ecebe9;
-  margin-bottom: 24rpx;
+.skeleton-line-short {
+  width: 65%;
+  height: 22rpx;
+  background: #F2F1ED;
+  margin-bottom: 28rpx;
   border-radius: 4rpx;
-  position: relative;
-  overflow: hidden;
 }
 
-.skeleton-footer {
-  width: 100%;
-  height: 20rpx;
-  background: #f0f0f0;
+.skeleton-footer-mock {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.skeleton-circle {
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 50%;
+  background: #F2F1ED;
+}
+
+.skeleton-line-footer {
+  width: 80rpx;
+  height: 16rpx;
+  background: #F2F1ED;
   border-radius: 4rpx;
-  position: relative;
-  overflow: hidden;
 }
 
-.skeleton-image::after,
-.skeleton-title::after,
-.skeleton-title-short::after,
-.skeleton-footer::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  animation: skeleton-shimmer 1.8s infinite linear;
-}
-
-@keyframes skeleton-shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #F2F1ED 25%, #EBE9E4 50%, #F2F1ED 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite linear;
 }
 
 /* ===== 空状态样式 ===== */

@@ -6,12 +6,35 @@
     enhanced
     show-scrollbar="{{false}}"
     scroll-into-view="{{scrollTarget}}"
+    scroll-top="{{savedScrollTop}}"
     scroll-with-animation
+    bindscroll="onPageScrollLocal"
   >
 
     <view class="article-body">
-      <view class="article-title-wrap" bindlongpress="onParagraphTap" data-index="-1" data-text="{{article.title}}">
-        <text class="article-title">{{article.title}}</text>
+      <view 
+        class="article-title-wrap" 
+        bindtouchstart="onParagraphTouchStart"
+        bindtouchend="onParagraphTouchEnd"
+        bindtouchmove="onParagraphTouchMove"
+        data-index="-1" 
+        data-text="{{article.title}}"
+      >
+        <block wx:if="{{article.titleWords}}">
+          <block wx:for="{{article.titleWords}}" wx:for-item="w" wx:key="id">
+            <text 
+              wx:if="{{w.isWord}}"
+              id="{{w.id}}"
+              class="article-title word-item {{highlightWordId === w.id ? 'word-highlight' : ''}}"
+              bindtap="onWordTap"
+              data-word="{{w.text}}"
+              data-sentence="{{article.title}}"
+              data-id="{{w.id}}"
+            >{{w.text}}</text>
+            <text wx:else class="article-title word-text">{{w.text}}</text>
+          </block>
+        </block>
+        <text wx:else class="article-title">{{article.title}}</text>
       </view>
       
       <view class="meta-row">
@@ -23,12 +46,30 @@
       </view>
 
       <view class="summary-box" wx:if="{{article.summary}}"
-        bindlongpress="onParagraphTap"
+        bindtouchstart="onParagraphTouchStart"
+        bindtouchend="onParagraphTouchEnd"
+        bindtouchmove="onParagraphTouchMove"
         data-index="-2"
         data-text="{{article.summary}}"
       >
         <text class="summary-label">摘要</text>
         <text class="summary-text">{{article.summary}}</text>
+      </view>
+
+      <!-- 文章全文的 AI 分析结果 -->
+      <view id="blk--3">
+        <block wx:if="{{article.fullInserts && article.fullInserts.length > 0}}">
+          <view wx:for="{{article.fullInserts}}" wx:for-item="ins" wx:for-index="insIdx" wx:key="id" class="ai-insert-card ai-full-analysis-card" style="margin: 0 32rpx 20rpx;">
+            <view class="ai-insert-header">
+              <view class="ai-insert-header-left">
+                <text class="ai-insert-icon">✦</text>
+                <text class="ai-insert-prompt">全文：{{ins.prompt}}</text>
+              </view>
+              <view class="ai-insert-close" bindtap="onRemoveAnalysis" data-index="-3" data-id="{{ins.id}}">×</view>
+            </view>
+            <text class="ai-insert-result" user-select>{{ins.result}}</text>
+          </view>
+        </block>
       </view>
 
       <!-- 文章摘要的 AI 分析结果 -->
@@ -37,7 +78,7 @@
           <view wx:for="{{article.summaryInserts}}" wx:for-item="ins" wx:for-index="insIdx" wx:key="id" class="ai-insert-card" style="margin: 0 32rpx 20rpx;">
             <view class="ai-insert-header">
               <view class="ai-insert-header-left">
-                <text class="ai-insert-icon">◆</text>
+                <text class="ai-insert-icon">✦</text>
                 <text class="ai-insert-prompt">{{ins.prompt}}</text>
               </view>
               <view class="ai-insert-close" bindtap="onRemoveAnalysis" data-index="-2" data-id="{{ins.id}}">×</view>
@@ -53,7 +94,7 @@
           <view wx:for="{{article.inserts}}" wx:for-item="ins" wx:for-index="insIdx" wx:key="id" class="ai-insert-card" style="margin: 0 32rpx 20rpx;">
             <view class="ai-insert-header">
               <view class="ai-insert-header-left">
-                <text class="ai-insert-icon">◆</text>
+                <text class="ai-insert-icon">✦</text>
                 <text class="ai-insert-prompt">{{ins.prompt}}</text>
               </view>
               <view class="ai-insert-close" bindtap="onRemoveAnalysis" data-index="-1" data-id="{{ins.id}}">×</view>
@@ -66,7 +107,7 @@
       <view class="content-area">
         <!-- AI 提示横幅 -->
         <view class="ai-hint-bar">
-          <text class="ai-hint-icon">❖</text>
+          <text class="ai-hint-icon">✦</text>
           <text class="ai-hint-text">长按文字段落，可选中后进行 AI 分析</text>
         </view>
 
@@ -98,51 +139,108 @@
             <view
               wx:if="{{item.type === 'p'}}"
               class="paragraph {{selectedIndex === index ? 'paragraph-selected' : ''}}"
-              bindlongpress="onParagraphTap"
+              bindtouchstart="onParagraphTouchStart"
+              bindtouchend="onParagraphTouchEnd"
+              bindtouchmove="onParagraphTouchMove"
               data-index="{{index}}"
               data-text="{{item.text}}"
             >
-              <text>{{item.text}}</text>
+              <block wx:if="{{item.words}}">
+                <block wx:for="{{item.words}}" wx:for-item="w" wx:key="id">
+                  <text 
+                    wx:if="{{w.isWord}}"
+                    id="{{w.id}}"
+                    class="word-item {{highlightWordId === w.id ? 'word-highlight' : ''}}"
+                    bindtap="onWordTap"
+                    data-word="{{w.text}}"
+                    data-sentence="{{item.text}}"
+                    data-id="{{w.id}}"
+                  >{{w.text}}</text>
+                  <text wx:else class="word-text">{{w.text}}</text>
+                </block>
+              </block>
+              <text wx:else>{{item.text}}</text>
             </view>
 
             <!-- 标题和其他内容块（同样支持长按分析） -->
             <view wx:if="{{item.type === 'h1'}}" class="block-h1"
-              bindlongpress="onParagraphTap"
+              bindtouchstart="onParagraphTouchStart"
+              bindtouchend="onParagraphTouchEnd"
+              bindtouchmove="onParagraphTouchMove"
               data-index="{{index}}" data-text="{{item.text}}">
-              <text user-select>{{item.text}}</text>
+               <block wx:for="{{item.words}}" wx:for-item="w" wx:key="id">
+                  <text wx:if="{{w.isWord}}" id="{{w.id}}" class="word-item {{highlightWordId === w.id ? 'word-highlight' : ''}}" bindtap="onWordTap" data-word="{{w.text}}" data-sentence="{{item.text}}" data-id="{{w.id}}">{{w.text}}</text>
+                  <text wx:else class="word-text">{{w.text}}</text>
+                </block>
             </view>
             <view wx:if="{{item.type === 'h2'}}" class="block-h2"
-              bindlongpress="onParagraphTap"
+              bindtouchstart="onParagraphTouchStart"
+              bindtouchend="onParagraphTouchEnd"
+              bindtouchmove="onParagraphTouchMove"
               data-index="{{index}}" data-text="{{item.text}}">
-              <text user-select>{{item.text}}</text>
+               <block wx:for="{{item.words}}" wx:for-item="w" wx:key="id">
+                  <text wx:if="{{w.isWord}}" id="{{w.id}}" class="word-item {{highlightWordId === w.id ? 'word-highlight' : ''}}" bindtap="onWordTap" data-word="{{w.text}}" data-sentence="{{item.text}}" data-id="{{w.id}}">{{w.text}}</text>
+                  <text wx:else class="word-text">{{w.text}}</text>
+                </block>
             </view>
             <view wx:if="{{item.type === 'h3'}}" class="block-h3"
-              bindlongpress="onParagraphTap"
+              bindtouchstart="onParagraphTouchStart"
+              bindtouchend="onParagraphTouchEnd"
+              bindtouchmove="onParagraphTouchMove"
               data-index="{{index}}" data-text="{{item.text}}">
-              <text user-select>{{item.text}}</text>
+               <block wx:for="{{item.words}}" wx:for-item="w" wx:key="id">
+                  <text wx:if="{{w.isWord}}" id="{{w.id}}" class="word-item {{highlightWordId === w.id ? 'word-highlight' : ''}}" bindtap="onWordTap" data-word="{{w.text}}" data-sentence="{{item.text}}" data-id="{{w.id}}">{{w.text}}</text>
+                  <text wx:else class="word-text">{{w.text}}</text>
+                </block>
             </view>
             <view wx:if="{{item.type === 'bullet'}}" class="block-bullet"
-              bindlongpress="onParagraphTap"
+              bindtouchstart="onParagraphTouchStart"
+              bindtouchend="onParagraphTouchEnd"
+              bindtouchmove="onParagraphTouchMove"
               data-index="{{index}}" data-text="{{item.text}}">
               <text class="bullet-dot">•</text>
-              <text user-select class="bullet-text">{{item.text}}</text>
+              <view class="bullet-text">
+                <block wx:for="{{item.words}}" wx:for-item="w" wx:key="id">
+                  <text wx:if="{{w.isWord}}" id="{{w.id}}" class="word-item {{highlightWordId === w.id ? 'word-highlight' : ''}}" bindtap="onWordTap" data-word="{{w.text}}" data-sentence="{{item.text}}" data-id="{{w.id}}">{{w.text}}</text>
+                  <text wx:else class="word-text">{{w.text}}</text>
+                </block>
+              </view>
             </view>
             <view wx:if="{{item.type === 'numbered'}}" class="block-bullet"
-              bindlongpress="onParagraphTap"
+              bindtouchstart="onParagraphTouchStart"
+              bindtouchend="onParagraphTouchEnd"
+              bindtouchmove="onParagraphTouchMove"
               data-index="{{index}}" data-text="{{item.text}}">
               <text class="bullet-dot">—</text>
-              <text user-select class="bullet-text">{{item.text}}</text>
+              <view class="bullet-text">
+                <block wx:for="{{item.words}}" wx:for-item="w" wx:key="id">
+                  <text wx:if="{{w.isWord}}" id="{{w.id}}" class="word-item {{highlightWordId === w.id ? 'word-highlight' : ''}}" bindtap="onWordTap" data-word="{{w.text}}" data-sentence="{{item.text}}" data-id="{{w.id}}">{{w.text}}</text>
+                  <text wx:else class="word-text">{{w.text}}</text>
+                </block>
+              </view>
             </view>
             <view wx:if="{{item.type === 'quote'}}" class="block-quote"
-              bindlongpress="onParagraphTap"
+              bindtouchstart="onParagraphTouchStart"
+              bindtouchend="onParagraphTouchEnd"
+              bindtouchmove="onParagraphTouchMove"
               data-index="{{index}}" data-text="{{item.text}}">
-              <text user-select>{{item.text}}</text>
+               <block wx:for="{{item.words}}" wx:for-item="w" wx:key="id">
+                  <text wx:if="{{w.isWord}}" id="{{w.id}}" class="word-item {{highlightWordId === w.id ? 'word-highlight' : ''}}" bindtap="onWordTap" data-word="{{w.text}}" data-sentence="{{item.text}}" data-id="{{w.id}}">{{w.text}}</text>
+                  <text wx:else class="word-text">{{w.text}}</text>
+                </block>
             </view>
             <view wx:if="{{item.type === 'callout'}}" class="block-callout"
-              bindlongpress="onParagraphTap"
+              bindtouchstart="onParagraphTouchStart"
+              bindtouchend="onParagraphTouchEnd"
+              bindtouchmove="onParagraphTouchMove"
               data-index="{{index}}" data-text="{{item.text}}">
               <text class="callout-emoji">{{item.emoji}}</text>
-              <text user-select class="callout-text">{{item.text}}</text>
+              <view class="callout-text">
+                <block wx:for="{{item.words}}" wx:for-item="w" wx:key="id">
+                  <text wx:if="{{w.isWord}}" id="{{w.id}}" class="word-item {{highlightWordId === w.id ? 'word-highlight' : ''}}" bindtap="onWordTap" data-word="{{w.text}}" data-sentence="{{item.text}}" data-id="{{w.id}}">{{w.text}}</text>
+                  <text wx:else class="word-text">{{w.text}}</text>
+                </block>
+              </view>
             </view>
 
             <!-- AI 分析结果卡片（任意块类型均支持） -->
@@ -156,7 +254,7 @@
               >
                 <view class="ai-insert-header">
                   <view class="ai-insert-header-left">
-                    <text class="ai-insert-icon">◆</text>
+                    <text class="ai-insert-icon">✦</text>
                     <text class="ai-insert-prompt">{{ins.prompt}}</text>
                   </view>
                   <view class="ai-insert-close" bindtap="onRemoveAnalysis" data-index="{{index}}" data-id="{{ins.id}}">×</view>
@@ -201,13 +299,127 @@
     </view>
   </scroll-view>
 
-  <!-- 底部收藏栏（紧凑） -->
+  <!-- 底部操作栏 -->
   <view class="bottom-bar">
-    <view class="bookmark-btn" bindtap="toggleBookmark">
-      <text class="bookmark-star {{bookmarked ? 'bookmarked' : ''}}">{{bookmarked ? '★' : '☆'}}</text>
-      <text class="bookmark-label">{{bookmarked ? '已收藏' : '收藏'}}</text>
+    <!-- 收藏（图标按钮，靠左） -->
+    <view class="bottom-bookmark-btn" bindtap="toggleBookmark">
+      <text class="bottom-bookmark-icon {{bookmarked ? 'bookmarked' : ''}}">{{bookmarked ? '★' : '☆'}}</text>
+    </view>
+
+    <!-- 分割线 -->
+    <view class="bottom-divider"></view>
+
+    <!-- 状态1：已完成全文分析 → 置灰不可点 -->
+    <view wx:if="{{fullAnalyzeDone}}" class="bottom-ai-btn bottom-ai-btn-done">
+      <text class="bottom-ai-icon-done">✔</text>
+      <text class="bottom-ai-label">已完成全文分析</text>
+    </view>
+
+    <!-- 状态2：分析进行中 → 进度动画 + 独立取消按钮 -->
+    <block wx:elif="{{isFullAnalyzing}}">
+      <view class="bottom-ai-btn bottom-ai-btn-busy">
+        <view class="ai-dots">
+          <view class="ai-dot"></view>
+          <view class="ai-dot"></view>
+          <view class="ai-dot"></view>
+        </view>
+        <text class="bottom-ai-label">分析中 {{fullAnalyzeProgress}}/{{fullAnalyzeTotal}}</text>
+      </view>
+      <view class="bottom-cancel-btn" bindtap="onCancelFullAnalysis">
+        <text class="bottom-cancel-label">取消</text>
+      </view>
+    </block>
+
+    <!-- 状态3：默认可点击 -->
+    <view wx:else class="bottom-ai-btn" bindtap="onFullAnalysis">
+      <text class="bottom-ai-icon">✦</text>
+      <text class="bottom-ai-label">AI 逐段分析全文</text>
     </view>
   </view>
+
+  <!-- 新手引导：沉浸式动画演示 -->
+  <view class="tutorial-overlay" wx:if="{{showTutorial}}" bindtap="onDismissTutorial" catchtouchmove="noop">
+
+    <!-- 右上角关闭按钮（大点击范围） -->
+    <view class="tutorial-close-btn-wrap" catchtap="onDismissTutorial">
+      <view class="tutorial-close-btn">
+        <text class="tutorial-close-icon">×</text>
+      </view>
+    </view>
+
+    <!-- 中间内容区：模拟文章段落 + 手指动画 -->
+    <view class="tutorial-scene" catchtap="noop">
+
+      <!-- 模拟文章标题（不可选） -->
+      <text class="tutorial-fake-title">OpenAI 发布全新模型，推理能力大幅提升</text>
+
+      <!-- 模拟段落1（不可选，灰色） -->
+      <text class="tutorial-fake-para">当地时间周一，OpenAI 正式宣布推出新一代语言模型，该模型在数学推理、代码生成和多语言理解等方面均有显著进步。</text>
+
+      <!-- 模拟段落2（整个段落被选中并出现高亮） -->
+      <view class="tutorial-fake-para" style="position: relative;">
+        <view style="display:inline-block; position:relative; z-index:1;">
+          <view class="tutorial-selection-bg"></view>
+          <text class="tutorial-fake-para-selected">只需长按通过 AI 分析段落内容，即可为您解答。阅读中遇到难以理解的概念和专业术语，它也能提供通俗易懂的解释。</text>
+        </view>
+        
+        <!-- 手指光标 -->
+        <view class="tutorial-cursor-wrap">
+          <text class="tutorial-cursor">☝️</text>
+          <view class="tutorial-press-ring"></view>
+          <view class="tutorial-press-ring tutorial-press-ring-2"></view>
+        </view>
+      </view>
+
+      <!-- 模拟段落3（不可选，灰色） -->
+      <text class="tutorial-fake-para">分析人士指出，这一进展将推动 AI 在法律、医疗、教育等垂直领域的更广泛落地应用。</text>
+    </view>
+
+    <!-- 模拟 AI 分析面板（从底部滑入） -->
+    <view class="tutorial-mock-panel">
+      <!-- 拖拽条 -->
+      <view class="tutorial-drag-bar-wrap">
+        <view class="tutorial-drag-bar"></view>
+      </view>
+      <!-- 标题行 -->
+      <view class="tutorial-mock-header">
+        <view class="tutorial-mock-title-row">
+          <text class="tutorial-mock-icon">✦</text>
+          <text class="tutorial-mock-title">AI 分析</text>
+        </view>
+        <view class="tutorial-mock-close" bindtap="onDismissTutorial">
+          <text class="tutorial-mock-close-icon">×</text>
+        </view>
+      </view>
+      <!-- 选中内容框 -->
+      <view class="tutorial-mock-selected-box">
+        <text class="tutorial-mock-selected-label">选中内容</text>
+        <text class="tutorial-mock-selected-text">只需长按通过 AI 分析段落内容，即可为您…</text>
+      </view>
+      <!-- 快捷操作 -->
+      <view class="tutorial-mock-chips">
+        <view class="tutorial-chip">翻译中文</view>
+        <view class="tutorial-chip">解释一下</view>
+        <view class="tutorial-chip">分析</view>
+        <view class="tutorial-chip">背景知识</view>
+      </view>
+      <!-- 输入行 -->
+      <view class="tutorial-mock-input-row">
+        <view class="tutorial-mock-input">
+          <text class="tutorial-mock-input-text">翻译为中文，列出重点词汇…</text>
+        </view>
+        <view class="tutorial-mock-send">
+          <text class="tutorial-mock-send-text">发送</text>
+        </view>
+      </view>
+      <!-- 底部提示 -->
+      <view class="tutorial-hint-row">
+        <text class="tutorial-hint-text">点击任意位置关闭引导</text>
+      </view>
+    </view>
+
+  </view>
+
 
   <!-- 遮罩层 -->
   <view class="ai-overlay" wx:if="{{showAiPanel}}" bindtap="closeAiPanel" catchtouchmove="noop"></view>
@@ -225,7 +437,7 @@
     <!-- 标题行 -->
     <view class="ai-panel-header">
       <view class="ai-panel-title-wrap">
-        <text class="ai-panel-icon">◆</text>
+        <text class="ai-panel-icon">✦</text>
         <text class="ai-panel-title">AI 分析</text>
       </view>
       <view class="ai-panel-close" bindtap="closeAiPanel">
@@ -242,7 +454,7 @@
           class="ai-panel-speak-btn {{isSpeaking ? 'speaking' : ''}}"
           bindtap="onSpeakSelected"
         >
-          <text class="ai-panel-speak-icon">{{isSpeaking ? '⏹' : '🔊'}}</text>
+          <view class="ai-panel-speak-icon"></view>
         </view>
       </view>
       <scroll-view scroll-y class="ai-selected-scroll" enhanced show-scrollbar="{{false}}">
@@ -250,8 +462,11 @@
           class="ai-selected-input"
           value="{{selectedText}}"
           bindinput="onSelectedTextChange"
-          auto-height
+          maxlength="-1"
           fixed
+          adjust-position="{{false}}"
+          hold-keyboard="{{true}}"
+          cursor-spacing="100"
           show-confirm-bar="{{false}}"
         ></textarea>
       </scroll-view>
@@ -268,11 +483,11 @@
       </view>
     </scroll-view>
 
-    <!-- 输入行 -->
+    <!-- 输入行 (统一用 textarea 以保证切换时不收起键盘) -->
     <view class="ai-input-row">
-      <input
+      <textarea
         class="ai-input"
-        placeholder="{{aiPrompt || '翻译为中文，输出原文，列出重点单词和词组，简短'}}"
+        placeholder="{{aiInput ? '' : '翻译为中文，输出原文，列出重点单词和词组，简短'}}"
         placeholder-class="ai-input-placeholder"
         bindinput="onAiInputChange"
         value="{{aiInput}}"
@@ -280,9 +495,14 @@
         bindconfirm="onSendAi"
         disabled="{{isAnalyzing}}"
         adjust-position="{{false}}"
+        hold-keyboard="{{true}}"
+        auto-height
+        fixed
+        cursor-spacing="20"
+        show-confirm-bar="{{false}}"
         bindfocus="onInputFocus"
         bindblur="onInputBlur"
-      />
+      ></textarea>
       <view class="ai-send-btn {{isAnalyzing ? 'ai-send-btn-analyzing' : ''}}" bindtap="{{isAnalyzing ? '' : 'onSendAi'}}">
         <block wx:if="{{isAnalyzing}}">
           <view class="ai-dots">
@@ -294,6 +514,70 @@
         <text class="ai-send-text" wx:else>发送</text>
       </view>
     </view>
+  </view>
+
+  <!-- 单词翻译气泡 -->
+  <view 
+    class="word-bubble-overlay" 
+    wx:if="{{showWordBubble}}" 
+    bindtap="closeWordBubble" 
+    catchtouchmove="noop"
+  ></view>
+  
+  <view 
+    class="word-bubble" 
+    wx:if="{{showWordBubble}}"
+    style="top: {{bubbleTop}}px; left: {{bubbleLeft}}px;"
+    catchtap="noop"
+  >
+    <!-- 箭头 -->
+    <view class="word-bubble-arrow {{bubbleArrowUp ? 'word-bubble-arrow-up' : 'word-bubble-arrow-down'}}"></view>
+
+    <!-- 加载中 -->
+    <view wx:if="{{isBubbleLoading}}" class="ai-dots" style="padding: 60rpx 0;">
+      <view class="ai-dot" style="background-color: #8B5CF6"></view>
+      <view class="ai-dot" style="background-color: #8B5CF6"></view>
+      <view class="ai-dot" style="background-color: #8B5CF6"></view>
+    </view>
+
+    <!-- 内容展示 -->
+    <block wx:else>
+      <view class="bubble-word-row">
+        <view class="bubble-word-left">
+          <text class="bubble-word">{{bubbleData.word}}</text>
+          <text class="bubble-phonetic">{{bubbleData.phonetic}}</text>
+          <text class="bubble-pos">{{bubbleData.pos}}</text>
+        </view>
+        <view class="bubble-speak-btn" catchtap="onSpeakWord">
+          <view class="bubble-speak-btn-icon"></view>
+        </view>
+      </view>
+      
+      <view class="bubble-trans-group">
+        <view class="bubble-trans-item">
+          <text class="bubble-trans-label">语境义</text>
+          <text class="bubble-trans-val">{{bubbleData.trans_context}}</text>
+        </view>
+        <view class="bubble-trans-item" wx:if="{{bubbleData.trans_general && bubbleData.trans_general !== bubbleData.trans_context}}">
+          <text class="bubble-trans-label">字典义</text>
+          <text class="bubble-trans-val">{{bubbleData.trans_general}}</text>
+        </view>
+      </view>
+      
+      <!-- 句子翻译 -->
+      <view class="bubble-context-trans" wx:if="{{bubbleData.sentence_trans}}">
+        <text class="bubble-sentence-trans-text">“{{bubbleData.sentence_trans}}”</text>
+      </view>
+
+      <view class="bubble-btns">
+        <view 
+          class="bubble-btn-add {{isExistedInVocab ? 'bubble-btn-add-done' : ''}}" 
+          catchtap="onAddToVocab"
+        >
+          {{isExistedInVocab ? '已加入 ✓' : '+ 加入生词本'}}
+        </view>
+      </view>
+    </block>
   </view>
 
 </view>

@@ -7,20 +7,24 @@
       class="disc-tab {{activeTab === 'bookmark' ? 'disc-tab-active' : ''}}"
       bindtap="switchTab" data-tab="bookmark"
     >
-      <text class="disc-tab-icon">★</text>
       <text class="disc-tab-text">收藏</text>
     </view>
     <view
       class="disc-tab {{activeTab === 'search' ? 'disc-tab-active' : ''}}"
       bindtap="switchTab" data-tab="search"
     >
-      <text class="disc-tab-icon">🔍</text>
       <text class="disc-tab-text">搜索</text>
+    </view>
+    <view
+      class="disc-tab {{activeTab === 'vocab' ? 'disc-tab-active' : ''}}"
+      bindtap="switchTab" data-tab="vocab"
+    >
+      <text class="disc-tab-text">生词</text>
     </view>
   </view>
 
-  <!-- ── 收藏页 ── -->
-  <scroll-view wx:if="{{activeTab === 'bookmark'}}" scroll-y class="disc-scroll">
+  <!-- ── 1. 收藏页 ── -->
+  <scroll-view wx:if="{{activeTab === 'bookmark'}}" scroll-y class="disc-scroll" bindrefresherrefresh="onRefresh" refresher-enabled refresher-triggered="{{isRefreshing}}">
 
     <!-- 空状态 -->
     <view wx:if="{{bookmarks.length === 0}}" class="empty-wrap">
@@ -56,7 +60,6 @@
 
     <!-- 搜索框 -->
     <view class="search-bar">
-      <text class="search-icon-txt">🔍</text>
       <input
         class="search-input"
         placeholder="搜索标题、分类、标签..."
@@ -72,7 +75,9 @@
 
     <!-- 无输入：话题分类 -->
     <view wx:if="{{!searchQuery}}">
-      <text class="section-title">📂 分类浏览</text>
+      <view class="section-label" style="padding-left: 32rpx; margin-top: 40rpx;">
+        <text class="section-label-text">分类浏览</text>
+      </view>
       <view class="trend-grid">
         <view
           wx:for="{{categories}}"
@@ -117,4 +122,66 @@
     <view style="height:120rpx"></view>
   </scroll-view>
 
+  <!-- ── 3. 生词页 ── -->
+  <scroll-view 
+    wx:if="{{activeTab === 'vocab'}}" 
+    scroll-y 
+    class="disc-scroll"
+    bindscrolltolower="onVocabScrollToLower"
+    lower-threshold="100"
+  >
+    <!-- 空状态 -->
+    <view wx:if="{{vocabulary.length === 0}}" class="empty-wrap">
+      <text class="empty-icon">📖</text>
+      <text class="empty-title">生词本还是空的</text>
+      <text class="empty-desc">阅读时点击单词即可快速加入</text>
+    </view>
+
+    <!-- 生词列表 -->
+    <view wx:for="{{vocabulary}}" wx:key="timestamp" class="vocab-card">
+      <view class="vocab-header">
+        <view class="vocab-word-info">
+          <text class="vocab-word">{{item.word}}</text>
+          <view class="vocab-speak-row">
+            <text class="vocab-phonetic">{{item.phonetic}}</text>
+            <view 
+              class="vocab-speak-btn {{speakingWord === item.word ? 'speaking' : ''}}" 
+              catchtap="onSpeakWord" 
+              data-word="{{item.word}}"
+            >
+              <view class="vocab-speak-icon"></view>
+            </view>
+          </view>
+          <text class="vocab-pos">{{item.pos}}</text>
+        </view>
+        <view class="vocab-delete" bindtap="removeVocab" data-ts="{{item.timestamp}}" data-id="{{item.id}}">移除</view>
+      </view>
+      
+      <view class="vocab-meanings">
+        <view class="vocab-meaning-item">
+          <text class="vm-label">语境意：</text>
+          <text class="vm-val">{{item.trans}}</text>
+        </view>
+        <view class="vocab-meaning-item" wx:if="{{item.transGeneral}}">
+          <text class="vm-label">字典意：</text>
+          <text class="vm-val">{{item.transGeneral}}</text>
+        </view>
+      </view>
+
+      <view class="vocab-context">
+        <rich-text nodes="{{item.sentence}}"></rich-text>
+      </view>
+      <view class="vocab-footer">
+        <text class="vocab-source">来源：{{item.sourceTitle}}</text>
+      </view>
+    </view>
+
+    <!-- 分页加载提示 -->
+    <view class="load-more-tip" wx:if="{{vocabulary.length > 0}}">
+      <text wx:if="{{isVocabLoading}}">加载中...</text>
+      <text wx:elif="{{!vocabHasMore}}">没有更多生词了</text>
+    </view>
+
+    <view style="height:120rpx"></view>
+  </scroll-view>
 </view>

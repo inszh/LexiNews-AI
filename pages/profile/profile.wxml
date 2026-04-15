@@ -1,38 +1,132 @@
 <!-- pages/profile/profile.wxml -->
 <view class="container">
-  <scroll-view scroll-y style="height:100vh" show-scrollbar="{{false}}">
+  <!-- 使用页面原生滚动，解决 Canvas 随屏漂移问题 -->
+  <view class="profile-content">
+    <!-- 仪表盘直接顶格 -->
+    <view class="dashboard-section section-gap" style="margin-top: 0 !important; padding-top: 32rpx !important;">
+      <view class="section-label">
+        <text class="section-label-icon">✦</text>
+        <text class="section-label-text">学习成就</text>
+      </view>
 
-    <!-- 顶部 Hero 区 -->
-    <view class="hero-section">
-      <view class="hero-blur-bg"></view>
-      <view class="avatar-wrap">
-        <view class="avatar-ring">
-          <view class="avatar-inner">
-            <image class="avatar-img" src="../../images/logo.png" mode="aspectFill"></image>
+      <!-- 100% 全宽顶部：阅读 Streak -->
+      <view class="dash-item-full">
+        <view class="dash-card streak-card-full">
+          <view class="streak-full-left">
+            <view class="streak-fire-big {{isTodayRead ? 'fire-active' : ''}}">🔥</view>
+          </view>
+          <view class="streak-full-center">
+            <view class="streak-num-wrap">
+              <text class="streak-num-big">{{streak}}</text>
+              <text class="streak-unit-big">天记录</text>
+            </view>
+            <text class="streak-title-dim">RESTREAK PRO</text>
+          </view>
+          <view class="streak-full-right">
+            <view class="streak-status-badge {{isTodayRead ? 'status-active' : ''}}">
+              {{isTodayRead ? '已达成' : '待阅读'}}
+            </view>
           </view>
         </view>
-        <view class="avatar-badge">AI</view>
       </view>
-      <text class="profile-name">LEXINEWS AI</text>
-      <text class="profile-sub">智能阅读 · 深度理解 · 高效学习</text>
 
-      <!-- 统计卡片（紧凑版） -->
-      <view class="stats-row">
-        <view class="stat-card" bindtap="{{activeTab}}" data-tab="read">
-          <text class="stat-val">{{readCount}}</text>
-          <text class="stat-lbl">已读</text>
+      <!-- 中间 1:1 双列：今日时长 & 累计文章 -->
+      <view class="dashboard-stats-grid">
+        <!-- 今日时长 -->
+        <view class="dash-card stats-mini-card">
+          <view class="mini-card-header">
+            <text class="mini-card-title">今日时长</text>
+          </view>
+          <view class="mini-card-main">
+            <text class="mini-card-val">{{todayMinutes}}</text>
+            <text class="mini-card-unit">min</text>
+            <view class="mini-progress-ring">
+              <view class="mini-progress-fill" style="height: {{ (todayMinutes/60)*100 }}%"></view>
+            </view>
+          </view>
         </view>
-        <view class="stat-divider"></view>
-        <view class="stat-card">
-          <text class="stat-val">{{aiCount}}</text>
-          <text class="stat-lbl">AI分析</text>
-        </view>
-        <view class="stat-divider"></view>
-        <view class="stat-card">
-          <text class="stat-val">{{likeCount}}</text>
-          <text class="stat-lbl">收藏</text>
+        <!-- 累计阅读 -->
+        <view class="dash-card stats-mini-card">
+          <view class="mini-card-header">
+            <text class="mini-card-title">本周阅读</text>
+          </view>
+          <view class="mini-card-main">
+            <text class="mini-card-val">{{totalArticles}}</text>
+            <text class="mini-card-unit">篇</text>
+            <view class="mini-icon-box">📚</view>
+          </view>
         </view>
       </view>
+
+      <!-- 本周阅读活跃 (置于词汇上方) -->
+      <view class="dash-card activity-card shadow-sm">
+        <view class="dash-card-header">
+          <view class="header-main">
+            <text class="dash-card-title">本周活跃</text>
+            <text class="dash-card-subtitle">Reading Consistency</text>
+          </view>
+          <view class="activity-avg">
+            <text class="avg-val">{{todayMinutes}}<text class="avg-unit">min</text></text>
+            <text class="avg-lbl">今日阅读</text>
+          </view>
+        </view>
+        <view class="bar-chart-modern">
+          <view class="bar-item-modern" wx:for="{{weeklyStats}}" wx:key="label">
+            <view class="bar-col-wrap-modern">
+              <view class="bar-col-modern {{item.minutes > 0 ? 'active' : ''}}" style="height: {{item.height || 0}}%"></view>
+            </view>
+            <text class="bar-label-modern">{{item.label}}</text>
+          </view>
+          <view class="chart-guide-line"></view>
+        </view>
+      </view>
+
+      <!-- 词汇成长曲线 -->
+      <view class="dash-card vocab-card shadow-sm">
+        <view class="dash-card-header">
+          <view>
+            <text class="dash-card-title">词汇成长</text>
+          </view>
+          <view class="vocab-total">
+            <text class="vocab-total-num">{{wordTotal || 0}}</text>
+            <text class="vocab-total-lbl">累计</text>
+          </view>
+        </view>
+
+        <!-- 生词卡片列表 (前置展示) -->
+        <view class="recent-words-wrap" wx:if="{{recentWords && recentWords.length > 0}}">
+          <scroll-view 
+            scroll-x 
+            class="recent-words-scroll" 
+            enhanced 
+            show-scrollbar="{{false}}"
+            bindscrolltolower="fetchMoreVocab"
+            lower-threshold="100"
+          >
+            <view class="recent-words-list">
+              <view 
+                class="word-chip {{item.showTrans ? 'chip-trans' : ''}}" 
+                wx:for="{{recentWords}}" 
+                wx:key="index"
+                bindtap="toggleWordTrans"
+                data-index="{{index}}"
+                style="animation-delay: {{index * 0.08}}s"
+              >
+                {{item.showTrans ? (item.trans_general || item.trans || '无翻译') : item.word}}
+              </view>
+              <!-- 加载中占位 -->
+              <view class="word-chip" style="opacity: 0.5; font-weight: normal;" wx:if="{{isVocabLoading}}">加载中...</view>
+            </view>
+          </scroll-view>
+        </view>
+        <view class="recent-words-empty" wx:else>尚未记录生词</view>
+
+        <!-- 曲线图移至下方 -->
+        <view class="chart-container" wx:if="{{wordGrowth && wordGrowth.length > 1}}">
+          <canvas type="2d" id="vocabChart" class="vocab-canvas"></canvas>
+        </view>
+      </view>
+
     </view>
 
     <!-- 社交推广区 -->
@@ -46,9 +140,6 @@
         <!-- 小红书 -->
         <view class="social-card xhs-card" bindtap="openXiaohongshu">
           <view class="social-card-left">
-            <view class="social-icon-wrap xhs-icon-bg">
-              <text class="social-icon">🍠</text>
-            </view>
             <view class="social-info">
               <text class="social-name">@Zane同学</text>
               <text class="social-desc">小红书 · 干货笔记分享</text>
@@ -62,9 +153,6 @@
         <!-- 微信公众号 -->
         <view class="social-card wechat-card" bindtap="openWechatOA">
           <view class="social-card-left">
-            <view class="social-icon-wrap wechat-icon-bg">
-              <text class="social-icon">💬</text>
-            </view>
             <view class="social-info">
               <text class="social-name">@Zane同学说</text>
               <text class="social-desc">微信公众号 · 深度内容</text>
@@ -78,117 +166,38 @@
       </view>
     </view>
 
-    <!-- AI 配置 -->
+    <!-- AI 配置 (v2.0 集中化管理版) -->
     <view class="section-gap">
       <view class="section-label">
-        <text class="section-label-icon">◆</text>
-        <text class="section-label-text">AI 配置</text>
+        <text class="section-label-icon">✦</text>
+        <text class="section-label-text">AI 服务状态</text>
       </view>
 
-      <!-- 接口地址 -->
       <view class="cfg-field-card">
         <view class="cfg-field-top">
-          <view class="cfg-icon-badge url-badge">
-            <text class="cfg-badge-icon">🌐</text>
+          <view class="cfg-field-meta" style="flex:1">
+            <text class="cfg-field-title">当前模型: {{serverAiConfig.model || '加载中...'}}</text>
+            <text class="cfg-field-desc">由 LexiNews AI 服务端统一驱动</text>
           </view>
-          <view class="cfg-field-meta">
-            <text class="cfg-field-title">接口地址</text>
-            <text class="cfg-field-desc">AI 服务的 API 地址</text>
-          </view>
-        </view>
-        <view class="cfg-input-box">
-          <input
-            class="cfg-inp"
-            placeholder="https://api.openai.com/v1/chat/completions"
-            placeholder-style="color:#C8C4BF;font-size:24rpx"
-            value="{{aiUrl}}"
-            bindinput="onUrlInput"
-            confirm-type="done"
-          />
-        </view>
-      </view>
-
-      <!-- API Key -->
-      <view class="cfg-field-card" style="margin-top:16rpx">
-        <view class="cfg-field-top">
-          <view class="cfg-icon-badge key-badge">
-            <text class="cfg-badge-icon">🔑</text>
-          </view>
-          <view class="cfg-field-meta">
-            <text class="cfg-field-title">API Key</text>
-            <text class="cfg-field-desc">身份验证密钥，本地加密存储</text>
-          </view>
-          <view class="cfg-eye-btn" bindtap="toggleKeyVis" style="width: 100rpx;">
-            <text class="cfg-eye-icon" style="font-size: 24rpx; color: #888;">{{showKey ? '隐藏' : '显示'}}</text>
+          <view class="status-badge {{serverAiConfig.status==='Active' ? 'active' : ''}}">
+            {{serverAiConfig.status || 'Offline'}}
           </view>
         </view>
-        <view class="cfg-input-box">
-          <input
-            class="cfg-inp cfg-inp-mono"
-            password="{{!showKey}}"
-            placeholder="sk-xxxxxxxxxxxxxxxx"
-            placeholder-style="color:#C8C4BF;font-size:24rpx"
-            value="{{apiKey}}"
-            bindinput="onKeyInput"
-            confirm-type="done"
-          />
+        
+        <view class="cfg-input-box-alt">
+          <view class="config-info-row">
+            <text class="info-label">语音解析 (TTS)</text>
+            <text class="info-val">{{serverAiConfig.enable_tts ? '已开启' : '未开启'}}</text>
+          </view>
+          <view class="config-info-row">
+            <text class="info-label">最后同步</text>
+            <text class="info-val">{{serverAiConfig.last_updated || '刚刚'}}</text>
+          </view>
         </view>
       </view>
 
-      <!-- 模型名 -->
-      <view class="cfg-field-card" style="margin-top:16rpx">
-        <view class="cfg-field-top">
-          <view class="cfg-icon-badge model-badge">
-            <text class="cfg-badge-icon">🤖</text>
-          </view>
-          <view class="cfg-field-meta">
-            <text class="cfg-field-title">模型名称</text>
-            <text class="cfg-field-desc">调用的语言模型标识符</text>
-          </view>
-        </view>
-        <view class="cfg-input-box">
-          <input
-            class="cfg-inp"
-            placeholder="[超低价]MiniMax-M2.5-highspeed"
-            placeholder-style="color:#C8C4BF;font-size:24rpx"
-            value="{{aiModel}}"
-            bindinput="onModelInput"
-            confirm-type="done"
-          />
-        </view>
-      </view>
-
-      <!-- 默认提示词 -->
-      <view class="cfg-field-card" style="margin-top:16rpx">
-        <view class="cfg-field-top">
-          <view class="cfg-icon-badge prompt-badge" style="background: rgba(144,202,249,0.15); color: #1976D2;">
-            <text class="cfg-badge-icon">💭</text>
-          </view>
-          <view class="cfg-field-meta">
-            <text class="cfg-field-title">默认提示词</text>
-            <text class="cfg-field-desc">AI 面板打开时的默认处理指令</text>
-          </view>
-        </view>
-        <view class="cfg-input-box">
-          <input
-            class="cfg-inp"
-            placeholder="翻译为中文，输出原文, 列出重点单词和词组，简短"
-            placeholder-style="color:#C8C4BF;font-size:24rpx"
-            value="{{aiPrompt}}"
-            bindinput="onPromptInput"
-            confirm-type="done"
-          />
-        </view>
-      </view>
-
-      <!-- 按钮组 -->
-      <view class="cfg-btn-group" style="margin-top:16rpx">
-        <button class="cfg-btn-reset" bindtap="resetSettings">恢复默认</button>
-        <button class="cfg-btn-save" bindtap="saveSettings">保存配置</button>
-      </view>
-
-      <view class="cfg-security-note" style="margin-top:16rpx">
-        <text class="cfg-security-text">配置仅存储于本地设备，不会上传任何服务器</text>
+      <view class="cfg-security-note" style="margin-top:24rpx">
+        <text class="cfg-security-text">系统已启用 Notion AI 配置同步。管理员可通过 Notion 实时调整模型参数，前端不再存储 Key，保障账户安全。</text>
       </view>
     </view>
 
@@ -216,7 +225,7 @@
     <!-- 关于 -->
     <view class="section-gap">
       <view class="section-label">
-        <text class="section-label-icon">ℹ</text>
+        <text class="section-label-icon">✦</text>
         <text class="section-label-text">关于</text>
       </view>
       <view class="about-card">
@@ -229,5 +238,5 @@
 
 
     <view style="height:120rpx"></view>
-  </scroll-view>
+  </view>
 </view>

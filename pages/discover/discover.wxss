@@ -237,3 +237,406 @@
 .result-body   { flex: 1; padding: 18rpx 20rpx; }
 .result-title  { font-size: 28rpx; font-weight: 700; color: #1A1A18; line-height: 1.5; display: block; margin-bottom: 10rpx; }
 .result-meta   { font-size: 20rpx; color: #8A8680; display: block; }
+
+/* ── 数据统计页样式 ── */
+.stats-container {
+  padding: 30rpx 40rpx;
+}
+
+.stat-main-card {
+  width: 100%;
+  background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+  border-radius: 40rpx;
+  padding: 40rpx;
+  margin-bottom: 30rpx;
+  color: #fff;
+  box-shadow: 0 20rpx 40rpx rgba(0,0,0,0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.streak-card {
+  background: linear-gradient(135deg, #2c3e50 0%, #000 100%);
+}
+
+.streak-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.streak-title {
+  font-size: 28rpx;
+  opacity: 0.8;
+  letter-spacing: 2rpx;
+}
+
+.streak-fire {
+  font-size: 50rpx;
+  filter: grayscale(1);
+  transition: all 0.3s;
+}
+
+.fire-active {
+  filter: grayscale(0);
+  text-shadow: 0 0 20rpx rgba(255, 69, 0, 0.6);
+}
+
+.streak-body {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 30rpx;
+}
+
+.streak-days {
+  font-size: 100rpx;
+  font-weight: 800;
+  font-family: 'Outfit', sans-serif;
+  margin-right: 20rpx;
+}
+
+.streak-unit {
+  font-size: 24rpx;
+  opacity: 0.6;
+  font-weight: 600;
+}
+
+.streak-footer {
+  display: flex;
+  align-items: center;
+  padding-top: 30rpx;
+  border-top: 1rpx solid rgba(255,255,255,0.1);
+}
+
+.streak-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #666;
+  margin-right: 16rpx;
+}
+
+.dot-active {
+  background: #4caf50;
+  box-shadow: 0 0 10rpx #4caf50;
+}
+
+.streak-msg {
+  font-size: 24rpx;
+  opacity: 0.9;
+}
+
+/* 子卡片 */
+.stat-sub-card {
+  background: #ffffff;
+  border-radius: 36rpx;
+  padding: 36rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 10rpx 30rpx rgba(0,0,0,0.05);
+}
+
+.card-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 30rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-badge {
+  font-size: 22rpx;
+  background: #f0f0f0;
+  padding: 6rpx 16rpx;
+  border-radius: 12rpx;
+  color: #666;
+}
+
+/* 图表画布 */
+.stat-canvas {
+  width: 100%;
+  height: 300rpx;
+  margin-bottom: 10rpx;
+}
+
+.canvas-labels {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10rpx;
+}
+
+.canvas-labels text {
+  font-size: 20rpx;
+  color: #bbb;
+}
+
+/* 里程碑 */
+.milestone-box {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+}
+
+.milestone-current {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 40rpx;
+}
+
+.ms-val {
+  font-size: 48rpx;
+  font-weight: 800;
+  color: #1a1a1a;
+}
+
+.ms-lbl {
+  font-size: 20rpx;
+  color: #999;
+}
+
+.milestone-progress-wrap {
+  flex: 1;
+}
+
+.ms-progress-bar {
+  width: 100%;
+  height: 12rpx;
+  background: #f0f0f0;
+  border-radius: 6rpx;
+  margin-bottom: 16rpx;
+  overflow: hidden;
+}
+
+.ms-progress-inner {
+  height: 100%;
+  background: linear-gradient(90deg, #F0B429, #FFD700);
+  border-radius: 6rpx;
+  transition: width 1s ease-out;
+}
+
+.ms-note {
+  font-size: 20rpx;
+  color: #bbb;
+}
+
+.milestone-badges {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30rpx;
+}
+
+.ms-badge {
+  width: 70rpx;
+  height: 70rpx;
+  border-radius: 50%;
+  background: #f8f8f8;
+  color: #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20rpx;
+  font-weight: 700;
+  border: 4rpx solid #fff;
+}
+
+.ms-badge-active {
+  background: #fff;
+  color: #F0B429;
+  border: 4rpx solid #F0B429;
+}
+
+/* 今日时长详情 */
+.time-today-box {
+  margin-top: 30rpx;
+  display: flex;
+  align-items: baseline;
+  padding-top: 20rpx;
+  border-top: 1rpx dashed #eee;
+}
+
+.time-today-lbl {
+  font-size: 24rpx;
+  color: #999;
+  margin-right: 20rpx;
+}
+
+.time-today-val {
+  font-size: 40rpx;
+  font-weight: 800;
+  color: #F0B429;
+  margin-right: 10rpx;
+}
+
+.time-today-unit {
+  font-size: 20rpx;
+  color: #999;
+}
+
+/* ===== 生词卡片 ===== */
+.vocab-card {
+  background: #FFFFFF;
+  border-radius: 28rpx;
+  margin: 24rpx;
+  padding: 32rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.04);
+}
+
+.vocab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16rpx;
+}
+
+.vocab-word-info {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 12rpx;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.vocab-word {
+  font-size: 38rpx;
+  font-weight: 800;
+  color: #1A1A18;
+}
+
+.vocab-phonetic {
+  font-size: 24rpx;
+  color: #8A8680;
+  font-family: monospace;
+}
+
+.vocab-speak-row {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.vocab-speak-btn {
+  width: 64rpx;
+  height: 64rpx;
+  background: #f4f3f0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.vocab-speak-btn:active {
+  transform: scale(0.9);
+  background: #ede9e2;
+}
+
+.vocab-speak-btn.speaking {
+  background: #8B5CF6;
+}
+
+.vocab-speak-icon {
+  width: 36rpx;
+  height: 36rpx;
+  background-color: #8B5CF6;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='11 5 6 9 2 9 2 15 6 15 11 19 11 5'%3E%3C/polygon%3E%3Cpath d='M15.54 8.46a5 5 0 0 1 0 7.08'%3E%3C/path%3E%3C/svg%3E") no-repeat center;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='11 5 6 9 2 9 2 15 6 15 11 19 11 5'%3E%3C/polygon%3E%3Cpath d='M15.54 8.46a5 5 0 0 1 0 7.08'%3E%3C/path%3E%3C/svg%3E") no-repeat center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.vocab-speak-btn.speaking .vocab-speak-icon {
+  background-color: #ffffff;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='4' width='16' height='16' rx='2'%3E%3C/rect%3E%3C/svg%3E") no-repeat center;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='4' width='16' height='16' rx='2'%3E%3C/rect%3E%3C/svg%3E") no-repeat center;
+}
+
+.vocab-pos {
+  font-size: 22rpx;
+  color: #B0ADA8;
+  font-style: italic;
+}
+
+.vocab-delete {
+  font-size: 22rpx;
+  color: #FF4D4F;
+  background: rgba(255, 77, 79, 0.08);
+  padding: 8rpx 20rpx;
+  border-radius: 40rpx;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-left: 20rpx;
+}
+
+.vocab-trans {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1A1A18;
+  margin-bottom: 20rpx;
+  display: block;
+}
+
+.vocab-meanings {
+  margin-bottom: 24rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.vocab-meaning-item {
+  display: flex;
+  align-items: flex-start;
+  line-height: 1.4;
+}
+
+.vm-label {
+  font-size: 24rpx;
+  color: #8A8680;
+  font-weight: 600;
+  white-space: nowrap;
+  margin-right: 8rpx;
+}
+
+.vm-val {
+  font-size: 28rpx;
+  color: #1A1A18;
+  font-weight: 700;
+}
+
+.vocab-context {
+  background: #F8F9FA;
+  padding: 20rpx;
+  border-radius: 16rpx;
+  font-size: 26rpx;
+  line-height: 1.6;
+  color: #4A4A48;
+  margin-bottom: 20rpx;
+}
+
+/* 兼容 rich-text 中的粗体高亮 */
+.vocab-context .bubble-sentence-hl,
+.vocab-context b {
+  color: #8B5CF6;
+  font-weight: 700;
+}
+
+.vocab-footer {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.vocab-source {
+  font-size: 20rpx;
+  color: #B0ADA8;
+}
+
+.load-more-tip {
+  text-align: center;
+  padding: 30rpx 0;
+  font-size: 24rpx;
+  color: #B0ADA8;
+}
+
